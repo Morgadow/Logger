@@ -14,6 +14,8 @@ import datetime
 
 ########
 # todo: create __exit__ function oder close() method
+# todo: create __dic__
+# todo: Singleton
 ########
 
 
@@ -60,25 +62,67 @@ import datetime
 
 # version
 __major__ = 2       # for major interface/format changes
-__minor__ = 1       # for minor interface/format changes
+__minor__ = 2       # for minor interface/format changes
 __release__ = 7     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
 
 
+class Singleton:
+    """
+    A non-thread-safe helper class to ease implementing singletons.
+    This should be used as a decorator -- not a metaclass -- to the
+    class that should be a singleton.
+
+    The decorated class can define one `__init__` function that
+    takes only the `self` argument. Also, the decorated class cannot be
+    inherited from. Other than that, there are no restrictions that apply
+    to the decorated class.
+
+    To get the singleton instance, use the `instance` method. Trying
+    to use `__call__` will result in a `TypeError` being raised.
+
+    For more information and a detailed discussion about how and how not to declare singeltons visit:
+    https://stackoverflow.com/questions/31875/is-there-a-simple-elegant-way-to-define-singletonspython
+
+    """
+
+    def __init__(self, decorated):
+        self._decorated = decorated
+
+    def instance(self):
+        """
+        Returns the singleton instance. Upon its first call, it creates a
+        new instance of the decorated class and calls its `__init__` method.
+        On all subsequent calls, the already created instance is returned.
+
+        """
+        try:
+            return self._instance
+        except AttributeError:
+            self._instance = self._decorated()
+            return self._instance
+
+    def __call__(self):
+        raise TypeError('Singletons must be accessed through `instance()`.')
+
+    def __instancecheck__(self, inst):
+        return isinstance(inst, self._decorated)
+
+
 class Logger(object):
 
     def __init__(self, loglvl='ERROR', projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
 
-        self.__createlogfile = createlogfile
-        if self.__createlogfile:
+        self.createlogfile = createlogfile
+        if self.createlogfile:
             self.__logFileCreated = False
             self.__logFileBuffer = []
-        self.__logpath = os.path.normpath(os.path.abspath(logpath))
-        self._addtimestamp = addtimestamp
+        self.logpath = os.path.normpath(os.path.abspath(logpath))
+        self.addtimestamp = addtimestamp
         self.__projectname = projectname  # shown in topLine of logFile
-        self.__suppressloggernotes = suppressloggernotes
+        self.suppressloggernotes = suppressloggernotes
 
         # set loglvl, save as numeric value
         self.__possibleloglvl = {'OFF': 100, 'CRITICAL': 50, 'ERROR': 40, 'WARNING': 30, 'INFO': 20, 'DEBUG': 10, 'ALL': 0}
@@ -93,15 +137,15 @@ class Logger(object):
         if '--help' in sys.argv:  # show complete help
             self.help()
             
-        if self.__createlogfile:
+        if self.createlogfile:
             self.__init_log_file()
 
         # would maybe fail before this line but who knows ...
         if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('WARNING', "Designed for Python 3.7, might fail!", desc='Logger')
 
-        if not self.__suppressloggernotes:
+        if not self.suppressloggernotes:
             self.add_to_log('INFO', "Logger ready!", desc='Logger')
 
     def help(self, keyword=None):
@@ -206,7 +250,7 @@ class Logger(object):
                 print("\t\tonlyToFile: Optional input, if set to True, message will only be written to logFile and not printed to screen")
             
         except Exception as e:
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Exception in help method!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
             else:
@@ -227,32 +271,32 @@ class Logger(object):
                     self.currloglvl = self.__possibleloglvl[loglvl.upper()]
                 else:  # input not recognized or not a valid loglevel
                     self.set_log_lvl(self.__defaultLogLvl)
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Input for desired log level not recognized! Took default log level: '{}'".format(self.__defaultLogLvl), desc='Logger')
 
             else:  # self.currloglvl is not None
             
                 if isinstance(loglvl, int) and loglvl in self.__possibleloglvlltostring:  # input integer
                     if self.currloglvl == loglvl:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('DEBUG', "Desired log level corresponds to the current one!", desc='Logger')
                         return
                     self.currloglvl = loglvl
                 elif isinstance(loglvl, str) and loglvl.upper() in self.__possibleloglvl:  # input string
                     if self.currloglvl == self.__possibleloglvl[loglvl.upper()]:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('DEBUG', "Desired log level corresponds to the current one!", desc='Logger')
                         return
                     self.currloglvl = self.__possibleloglvl[loglvl.upper()]
                 else:  # input not recognized or not a valid loglevel
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Input for desired log level not recognized!", desc='Logger')
                     return
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('INFO', "Logger level set to: '{}' : {}".format(self.__possibleloglvlltostring[self.currloglvl], self.currloglvl), desc='Logger')
             
         except Exception as e:
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Exception while setting log level!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
             else:
@@ -275,33 +319,33 @@ class Logger(object):
             max_length_log_level_name = 25
            
             if not isinstance(newloglvl, list) or len(newloglvl) != 2:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "Wrong input argument, please provide list with following format: ['levelName', levelInInteger]!", desc='Logger | addLogLvl')
                 return
             if not isinstance(newloglvl[0], str) or not isinstance(newloglvl[1], int):
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "Wrong input argument, please provide list with following format: ['levelName', levelInInteger]!", desc='Logger | addLogLvl')
                 return
             if not min_index_log_level < newloglvl[1] < max_index_log_level:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "Integer equivalent has to be an integer between {} and {}!".format(min_index_log_level, max_index_log_level), desc='Logger | addLogLvl')
                 return
             if not min_length_log_level_name < len(newloglvl[0]) < max_length_log_level_name:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "Length of new logger level has to be between {} and {} symbols!".format(min_length_log_level_name, max_length_log_level_name), desc='Logger | addLogLvl')
                 return
             if newloglvl[0] in self.__possibleloglvl or newloglvl[1] in self.__possibleloglvlltostring:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "New Logger level name or integer value already exists!", desc='Logger | addLogLvl')
                 return
             
             self.__possibleloglvl.update({newloglvl[0].upper(): newloglvl[1]})
             self.__possibleloglvlltostring.update({newloglvl[1]: newloglvl[0].upper()})
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('INFO', "Added custom log level: ['{}', {}]".format(newloglvl[0].upper(), newloglvl[1]), desc='Logger')
             
         except Exception as e:
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Exception while adding a custom log level!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
             else:
@@ -320,15 +364,15 @@ class Logger(object):
                     if delloglvl[1] != self.currloglvl:
                         del(self.__possibleloglvl[delloglvl[0]])
                         del(self.__possibleloglvlltostring[delloglvl[1]])
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('INFO', "Deleted log level: {}".format(delloglvl), desc='Logger')
                         return
                     else:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('WARNING', "Can't remove current log level!", desc='Logger')
                         return
                 else:
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('WARNING', "Log level to delete does not exist!", desc='Logger')
                     return
             
@@ -338,15 +382,15 @@ class Logger(object):
                     if self.__possibleloglvl[delloglvl] != self.currloglvl:
                         del(self.__possibleloglvlltostring[self.__possibleloglvl[delloglvl]])
                         del(self.__possibleloglvl[delloglvl])
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('INFO', "Deleted log level: {}".format(delloglvl), desc='Logger')
                         return
                     else:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('WARNING', "Can't remove current log level!", desc='Logger')
                         return
                 else:
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('WARNING', "Log level to delete does not exist!", desc='Logger')
                     return
             
@@ -356,20 +400,20 @@ class Logger(object):
                     if delloglvl != self.currloglvl:
                         del(self.__possibleloglvl[self.__possibleloglvlltostring[delloglvl]])
                         del(self.__possibleloglvlltostring[delloglvl])
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('INFO', "Deleted log level: {}".format(delloglvl), desc='Logger')
                         return
                     else:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('WARNING', "Can't remove current log level!", desc='Logger')
                         return
                 else:
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('WARNING', "Log level to delete does not exist!", desc='Logger')
                     return
                     
         except Exception as e:
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Exception while removing log level!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
             else:
@@ -397,31 +441,31 @@ class Logger(object):
     def __init_log_file(self):
 
         try:
-            if self.__logpath is None:  # then take default path: skriptpath + 'logs'
-                self.__logpath = os.path.normpath(os.path.join(os.getcwd(), 'logs'))
-                if not os.path.exists(self.__logpath):
-                    os.mkdir(self.__logpath)  # create folder if not existing
-                    if os.path.exists(self.__logpath):
-                        if not self.__suppressloggernotes:
+            if self.logpath is None:  # then take default path: skriptpath + 'logs'
+                self.logpath = os.path.normpath(os.path.join(os.getcwd(), 'logs'))
+                if not os.path.exists(self.logpath):
+                    os.mkdir(self.logpath)  # create folder if not existing
+                    if os.path.exists(self.logpath):
+                        if not self.suppressloggernotes:
                             self.add_to_log('INFO', "Created folder 'logs' at '{}'".format(os.getcwd()), desc='Logger')
                     else:
-                        self.__createlogfile = False
-                        if not self.__suppressloggernotes:
+                        self.createlogfile = False
+                        if not self.suppressloggernotes:
                             self.add_to_log('ERROR', "Could not create folder 'logs' at '{}'. Will not create a log file!".format(os.getcwd()), desc='Logger')
                         return
             else:  # create all subfolder needed
-                sub_folder_list = self.__logpath.split("\\")
+                sub_folder_list = self.logpath.split("\\")
                 delim = '\\'
                 for folder in range(len(sub_folder_list)):
                     if not os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
                         os.mkdir(os.path.normpath(delim.join(sub_folder_list[:folder + 1])))
                         if os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
-                            if not self.__suppressloggernotes:
+                            if not self.suppressloggernotes:
                                 # self.addToLog('DEBUG',"Created folder: {}".format(folder), desc='Logger')
                                 self.add_to_log('DEBUG', "Created folder: '{}' at: '{}'".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])), desc='Logger')
                         else:
-                            self.__createlogfile = False
-                            if not self.__suppressloggernotes:
+                            self.createlogfile = False
+                            if not self.suppressloggernotes:
                                 self.add_to_log('ERROR', "Could not create folder '{}' at '{}'! Will not create log file!".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])), desc='Logger')
                             return
 
@@ -431,33 +475,33 @@ class Logger(object):
                 self.__logFileName = self.__projectname + '_' + now.strftime("%d-%m-%Y") + '.txt'
             else:
                 self.__logFileName = now.strftime("%d-%m-%Y") + '.txt'
-            if self.__logFileName in os.listdir(self.__logpath):  # if file with name already exists add '_X' and count X until not existing
+            if self.__logFileName in os.listdir(self.logpath):  # if file with name already exists add '_X' and count X until not existing
                 counter = 1
                 while True:
                     if self.__projectname is not None:
                         self.__logFileName = self.__projectname + '_' + now.strftime("%d-%m-%Y") + '_' + str(counter) + '.txt'
                     else:
                         self.__logFileName = now.strftime("%d-%m-%Y") + '_' + str(counter) + '.txt'
-                    if self.__logFileName in os.listdir(self.__logpath):
+                    if self.__logFileName in os.listdir(self.logpath):
                         counter += 1
                     else:
                         break
             
             # init logfile
-            with open(os.path.join(self.__logpath, self.__logFileName), 'w+') as logFile:
+            with open(os.path.join(self.logpath, self.__logFileName), 'w+') as logFile:
                 if self.__projectname is not None:
                     logFile.write('---------------- {} - Log File vom {} um {} Uhr ----------------\n\n'.format(self.__projectname, now.strftime("%d-%m-%Y"), now.strftime("%H:%M")))
                 else:
                     logFile.write('---------------- Log File vom {} um {} Uhr ----------------\n\n'.format(now.strftime("%d-%m-%Y"), now.strftime("%H:%M")))
                     
-            if not os.path.isfile(os.path.join(self.__logpath, self.__logFileName)):  # could not create file
-                self.__createlogfile = False
-                if not self.__suppressloggernotes:
+            if not os.path.isfile(os.path.join(self.logpath, self.__logFileName)):  # could not create file
+                self.createlogfile = False
+                if not self.suppressloggernotes:
                     self.add_to_log('ERROR', "Could not create log file! Logger will not create any log file!", desc='Logger')
                 return
             else:
-                if not self.__suppressloggernotes:
-                    self.add_to_log('INFO', "Created log file '{}' at '{}'!".format(self.__logFileName, self.__logpath), desc='Logger')
+                if not self.suppressloggernotes:
+                    self.add_to_log('INFO', "Created log file '{}' at '{}'!".format(self.__logFileName, self.logpath), desc='Logger')
                 self.__logFileCreated = True
                 
             # print buffer
@@ -467,8 +511,8 @@ class Logger(object):
                 self.__logFileBuffer = []
                 
         except Exception as e: 
-            self.__createlogfile = False
-            if not self.__suppressloggernotes:
+            self.createlogfile = False
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Excecution while creating log file! Logger will not create any log file!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
        
@@ -486,42 +530,42 @@ class Logger(object):
             # check level
             if not isinstance(lvl, str):
                 if not isinstance(lvl, int):
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Given Logger Level type not supported! Please provide as string or integer!", desc='Logger | addToLog')
                     return
                 else:
                     if lvl in self.__possibleloglvlltostring:
                         lvl = self.__possibleloglvlltostring[lvl]  # convert into string equivalent
                     else:
-                        if not self.__suppressloggernotes:
+                        if not self.suppressloggernotes:
                             self.add_to_log('ERROR', "Given logger level not recognized!", desc='Logger | addToLog')
                         return 
             else:
                 if lvl.upper() not in self.__possibleloglvl:
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Given logger level not recognized!", desc='Logger | addToLog')
                     return
                    
             # only print messages with same or higher value
             if not self.__possibleloglvl[lvl.upper()] >= self.currloglvl:
-                if 'DEBUG' in self.__possibleloglvl and self.currloglvl <= self.__possibleloglvl['DEBUG'] and not self.__suppressloggernotes: # otherwise recursion error
+                if 'DEBUG' in self.__possibleloglvl and self.currloglvl <= self.__possibleloglvl['DEBUG'] and not self.suppressloggernotes: # otherwise recursion error
                     self.add_to_log('DEBUG', "Message log level '{}' was lower than logger log level '{}'!".format(lvl, self.__possibleloglvlltostring[self.currloglvl]), desc='Logger')
                 return
             
             # check message        
             if not min_length_message < len(message) < max_length_message:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('WARNING', "The message may only be between {} and {} characters long!".format(min_length_message, max_length_message), desc='Logger | addToLog')
                 if len(message) > max_length_message:  # resize message if to long
                     message = message[:max_length_message] + ' ...'
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('DEBUG', "Message exceeds {}, message was resized!".format(max_length_message), desc='Logger | addToLog')
                 if len(message) < min_length_message:  # return if to short
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('DEBUG', "Message length below {}, not sending any!".format(min_length_message), desc='Logger | addToLog')
                     return
             if len(desc) > max_desc_length:
-                if not self.__suppressloggernotes:
+                if not self.suppressloggernotes:
                     self.add_to_log('WARNING', "Maximum length of description length of {} exceeded!".format(max_desc_length), desc='Logger | addToLog')
                 desc = ''
 
@@ -530,7 +574,7 @@ class Logger(object):
             if not desc == '' and desc[-3:] != ' | ':  # second part escpecially needed when printing logFileBuffer
                 desc = desc + ' | '
             timestamp = ''
-            if self._addtimestamp:
+            if self.addtimestamp:
                 now = datetime.datetime.now()
                 timestamp = now.strftime('%d.%m.%Y') + ' ' + now.strftime('%H:%M') + ' | '
             logmessage = lvl.upper() + ' | ' + timestamp + desc + str(message)
@@ -538,21 +582,21 @@ class Logger(object):
             # print to console and write to logfile
             if not onlytofile:
                 print(logmessage)
-            if self.__createlogfile and self.__logFileCreated:  # if logfile already created
+            if self.createlogfile and self.__logFileCreated:  # if logfile already created
                 try:
-                    with open(os.path.join(self.__logpath, self.__logFileName), 'a') as logFile:
+                    with open(os.path.join(self.logpath, self.__logFileName), 'a') as logFile:
                         logFile.write(logmessage + '\n')
                 except Exception as e:
-                    if not self.__suppressloggernotes:
+                    if not self.suppressloggernotes:
                         self.add_to_log('CRITICAL', "Exception while writing to logFile!", desc='Logger')
                         self.add_to_log('CRITICAL', "Exception: {}".format(e))
                     else:
                         pass
-            elif self.__createlogfile and not self.__logFileCreated:  # write to buffer and write to file after creation
+            elif self.createlogfile and not self.__logFileCreated:  # write to buffer and write to file after creation
                 self.__logFileBuffer.append((lvl, message, desc))
             
         except Exception as e:
-            if not self.__suppressloggernotes:
+            if not self.suppressloggernotes:
                 self.add_to_log('CRITICAL', "Exception while adding data to log!", desc='Logger')
                 self.add_to_log('CRITICAL', "Exception: {}".format(e))
             else:
