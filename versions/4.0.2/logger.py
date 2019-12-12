@@ -110,9 +110,9 @@ class Logger(Borg):
     def __init__(self, loglvl='ERROR', projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
         Borg.__init__(self)  # monostate
 
-        # todo wenn neue instanz erstellt wird, dann werden auch alle attribute wieder von der neuen instanz übernommen auf alle anderen
+        # todo wenn neue instanz erstellt wird, dann werden auch alle attribute wieder von der neuen instanz ï¿½bernommen auf alle anderen
         # es sollen aber die alten attribute in die neue instanz mitgenommen werden und nicht anders herum
-        # immerhin werden attribute wenn nicht geändert auch beibehalten, nur wenn geändert, dann wird die veränderung mitgenommen
+        # immerhin werden attribute wenn nicht geï¿½ndert auch beibehalten, nur wenn geï¿½ndert, dann wird die verï¿½nderung mitgenommen
         # todo diesen hinweis mit in die help schreiben, bzw in die docstrings beider/der loggerklasse
 
         self.createlogfile = createlogfile
@@ -167,7 +167,7 @@ class Logger(Borg):
                     if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Input for desired log level not recognized! Took default log level: '{}'".format(self.__defaultLogLvl), desc='Logger')
 
-            else:  # self.currloglvl is not None
+            else:  # self.current_log_level is not None
             
                 if isinstance(loglvl, int) and loglvl in self.__possibleloglvlltostring:  # input integer
                     if self.currloglvl == loglvl:
@@ -313,9 +313,9 @@ class Logger(Borg):
                 pass
 
     # @property
-    # def currloglvl(self):
-    #     self.add_to_log('INFO',"Current Logger Level: ['{}', {}]".format(self.__possibleloglvlltostring[self.currloglvl],self.currloglvl), desc='Logger')
-    #     return self.__possibleloglvlltostring[self.currloglvl], self.currloglvl
+    # def current_log_level(self):
+    #     self.add_to_log('INFO',"Current Logger Level: ['{}', {}]".format(self.__possibleloglvlltostring[self.current_log_level],self.current_log_level), desc='Logger')
+    #     return self.__possibleloglvlltostring[self.current_log_level], self.current_log_level
 
     @property
     def possible_log_lvl(self):
