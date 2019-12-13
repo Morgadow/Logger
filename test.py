@@ -5,5 +5,9 @@ import os
 
 
 
-logger = Logger(loglvl='DEBUG')
-print(logger.current_log_level)
+logger = Logger(loglvl='DEBUG', addtimestamp=True, suppressloggernotes=False)
+logger.set_debug()
+logger.set_debug()
+logger.set_debug()
+logger.info("ich bin ein Promi")
+logger.warning("holt mich hier raus!")

@@ -16,7 +16,7 @@ import datetime
 # todo: create __exit__ function oder close() method
 # todo: change loglevel name from currloglevel to loglevel or something similar
 # todo: print loglevel returns String instead of int
-# todo: logfilename aktuell: 11_11_2019.txt > log_PROJECTNAME_YYYYMMDD_HH_MM.txt
+# todo: logfilename aktuell: 11_11_2019.log > log_PROJECTNAME_YYYYMMDD_HH_MM.log
 # todo .info, .warning, . ...
 # todo cant delete default log classes
 # todo handle excep as util method
@@ -31,48 +31,6 @@ import datetime
 # print(list(mydict.keys())[list(mydict.values()).index(16)]) # Prints george
 # siehe: https://stackoverflow.com/questions/8023306/get-key-by-value-in-dictionary
 #  ########
-
-
-#############################
-# Documentation:
-#    # INPUTS
-#        # OPTIONAL logLvl
-#            # default: 'ERROR' : 40
-#            # Defines which messages are displayed and logged
-#            # available ones displayed below, custom ones can be added via the addLogLvl method
-#            # can be changed after initialisation with the setlogLvl method
-#        # OPTIONAL projectName
-#            # default: None
-#            # Written in the logFile if defined and if logFile is created
-#        # OPTIONAL createLogFile
-#            # default: False
-#            # if set to True, a logFile .txt is created and saved
-#        # OPTIONAL logPath
-#            # default: skript directory
-#            # place where logFile is saved if one is desired
-#        # OPTIONAL addTimeStamp
-#            # default: False
-#            # enables timestamp in logmessages, helpful for projects with longer runtime
-#
-#    # METHODS
-#        # help()
-#        # getLogLvl()
-#        # setLogLvl()
-#        # addLogLvl()
-#        # _removeLogLvl()
-#        # __init_log_file()
-#        # addToLog()
-#
-#    # DEFAULT LOG LEVELS:
-#        # OFF       :   100
-#        # CRITICAL  :   50
-#        # ERROR     :   40
-#        # WARNING   :   30
-#        # INFO      :   20
-#        # DEBUG     :   10
-#        # ALL       :   0
-#        # add more with the addLogLvl method
-#############################
 
 # version
 __major__ = 4       # for major interface/format changes
@@ -138,7 +96,7 @@ class LogLevel:
 
 class Logger(Borg):
 
-    def __init__(self, loglvl=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
+    def __init__(self, loglvl=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppress_logger_notes=False):
         Borg.__init__(self)  # monostate
 
         # todo wenn neue instanz erstellt wird, dann werden auch alle attribute wieder von der neuen instanz übernommen auf alle anderen
@@ -154,156 +112,215 @@ class Logger(Borg):
         self.CRITICAL = LogLevel('CRITICAL', 50)
         self.ALL = LogLevel('ALL', MAX_LOG_LEVEL_VALUE)
 
-        self.suppress_logger_notes = suppressloggernotes  # todo nach unten? eher nicht
-        self.current_log_level = None
+        self.suppress_logger_notes = suppress_logger_notes
+        self.__project_name = projectname  # shown in topLine of logFile
+        self.time_stamp = addtimestamp
 
+        self.current_log_level = None  # set log level
         result = self.set_log_lvl(loglvl)
         if not result:
-            self.set_log_lvl(DEFAULT_LOG_LEVEL)
+            self.current_log_level = vars(self)[DEFAULT_LOG_LEVEL]
+            self.logger_note('INFO', "Set log level to default log level: " + str(self.current_log_level.name))
 
-        # self.createlogfile = createlogfile
-        # if self.createlogfile:
-        #     self.__logFileCreated = False
-        #     self.__logFileBuffer = []
-        #     self.logpath = os.path.normpath(os.path.abspath(logpath))
-        # self.time_stamp = addtimestamp
-        # self.__projectname = projectname  # shown in topLine of logFile
-        # self.suppress_logger_notes = suppressloggernotes
-        #
-        # # set loglvl, save as numeric value
-        # self.__defaultLogLvl = self.INFO  # if someone tries initializing without valid log level
-        # self.current_log_level = None
-        # self.set_log_lvl(loglvl)
-        #
-        # if '--debug' in sys.argv:
-        #     self.set_log_lvl('ALL')
-        #     self.add_to_log('INFO', "Enter Debug Mode: Turning all Logmessages on!", desc='Logger')
-        #
-        # if self.createlogfile:
-        #     self.__init_log_file()
-        #
-        # # would maybe fail before this line but who knows ...
-        # if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
-        #     if not self.suppress_logger_notes:
-        #         self.add_to_log('WARNING', "Designed for Python 3.7, might fail!", desc='Logger')
-        #
-        # if not self.suppress_logger_notes:  # todo raus
-        #     self.add_to_log('INFO', "Logger ready!", desc='Logger')
+        self.create_log_file = createlogfile
+        if self.create_log_file:
+            self.__log_file_created = False
+            self.__log_file_name = None
+            self.__log_file_buffer = []
+            self.log_path = os.path.normpath(os.path.abspath(logpath))
+            self.__init_log_file()
 
-    def set_log_lvl(self, loglvl):
+        # would maybe fail before this line but who knows ...
+        if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
+            if not self.suppress_logger_notes:
+                self.add_to_log('WARNING', "Designed for Python 3.7, might fail!", desc='Logger')
+
+        self.logger_note('INFO', "Logger ready!", desc='Logger')
+
+    def set_log_lvl(self, log_level):
         """
         Sets log level to new level
-        :param loglvl: String, name of new log level, must be the name of a LogLevel class instance
+        :param log_level: String, name of new log level, must be the name of a LogLevel class instance
         :return: Boolean, true if set to new level
         """
-        if loglvl not in vars(self) or not isinstance(vars(self)[loglvl], LogLevel):  # nicer approach than invoking __dict__
-            self.logger_note('ERROR', "Unknown log level: {}".format(loglvl))
+        try:
+            if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
+                self.logger_note('ERROR', "Unknown log level: {}".format(log_level))
+                return False
+            self.current_log_level = vars(self)[log_level.upper()]
+            self.logger_note('INFO', "Set Log level to {}".format(self.current_log_level.name))
+            return True
+        except Exception as e:
+            self.__handle_excep(e)
             return False
-        self.current_log_level = vars(self)[loglvl]
-        self.logger_note('INFO', "Set Log level to {}".format(self.current_log_level.name))
-        return True
 
-
-
-    def log_level(self):
+    def get_log_level(self):
         """ Returns current log level """
         return self.current_log_level.name, self.current_log_level.value
 
-    def add_log_lvl(self, newloglvl):
-        """
-        used to add a custom logLvl provided as list with format: ['name', integerValue]
-        """
-        
-        min_index_log_level = 0
-        max_index_log_level = 100
-        min_length_log_level_name = 1
-        max_length_log_level_name = 25
-           
-        #todo
-    
-    def _remove_log_lvl(self, delloglvl):
-        # todo
-        pass
-
     def __init_log_file(self):
-        #todo
-        pass
+        try:
+            if self.log_path is None:  # then take default path: skriptpath + 'logs'
+                self.log_path = os.path.normpath(os.path.join(os.getcwd(), 'logs'))
+                if not os.path.exists(self.log_path):
+                    os.mkdir(self.log_path)  # create folder if not existing
+                    if os.path.exists(self.log_path):
+                        self.logger_note('DEBUG', "Created folder 'logs' at '{}'".format(os.getcwd()))
+                    else:
+                        self.create_log_file = False
+                        self.logger_note('ERROR', "Could not create folder 'logs' at '{}'. Will not create a log file!".format(os.getcwd()))
+                        return False
 
-    def handle_excep(self, exception, with_tb=True):
+            else:  # create all subfolders needed
+                delim = '\\'
+                sub_folder_list = self.log_path.split(delim)
+                for folder in range(len(sub_folder_list)):
+                    if not os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
+                        os.mkdir(os.path.normpath(delim.join(sub_folder_list[:folder + 1])))
+                        if os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
+                            self.logger_note('DEBUG', "Created folder: '{}' at: '{}'".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])))
+                        else:
+                            self.create_log_file = False
+                            self.logger_note('ERROR', "Could not create folder '{}' at '{}'! Will not create log file!".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])))
+                            return False
+
+            # evaluate __log_file_name
+            now = datetime.datetime.now()
+            if self.__project_name is not None:
+                self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '.log'
+            else:
+                self.__log_file_name = now.strftime("%d-%m-%Y") + '.log'
+            if self.__log_file_name in os.listdir(self.log_path):  # if file with name already exists add '_X' and count X until not existing
+                counter = 1
+                while True:
+                    if self.__project_name is not None:
+                        self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
+                    else:
+                        self.__log_file_name = now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
+                    if self.__log_file_name in os.listdir(self.log_path):
+                        counter += 1
+                    else:
+                        break
+
+            # init logfile
+            with open(os.path.join(self.log_path, self.__log_file_name), 'w+') as log_file:
+                if self.__project_name is not None:
+                    log_file.write('---------------- {} - Log File vom {} um {} Uhr ----------------\n\n'.format(self.__project_name, now.strftime("%d-%m-%Y"), now.strftime("%H:%M")))
+                else:
+                    log_file.write('---------------- Log File vom {} um {} Uhr ----------------\n\n'.format(
+                        now.strftime("%d-%m-%Y"), now.strftime("%H:%M")))
+
+            if not os.path.isfile(os.path.join(self.log_path, self.__log_file_name)):  # could not create file
+                self.create_log_file = False
+                self.logger_note('ERROR', "Could not create log file! Logger will not create any log file!")
+                return False
+            else:
+                self.logger_note('INFO', "Created log file '{}' at '{}'!".format(self.__log_file_name, self.log_path))
+                self.__log_file_created = True
+
+            # print buffer
+            if self.__log_file_created and len(self.__logFileBuffer) > 0:
+                for message in self.__logFileBuffer:
+                    self.add_to_log(message[0], message[1], desc=message[2], onlytofile=True)
+                self.__logFileBuffer = []
+
+            return True
+
+        except Exception as e:
+            self.create_log_file = False
+            self.__handle_excep(e)
+            return False
+
+    def __handle_excep(self, exception, with_tb=True):
         """ prints exception """
-        # todo
         if not self.suppress_logger_notes:
-            print("CRITICAL: {}".format(exception))
-            if with_tb:  # with traceback
-                import traceback
-                traceback.print_exc()
-                print("")
+            try:
+                self.logger_note('CRITICAL', "{}".format(exception), desc='Logger')
+                if with_tb:  # with traceback
+                    import traceback
+                    traceback.print_exc()
+                    print("")
+            except Exception as e:
+                print(e)
+                if with_tb:  # with traceback
+                    import traceback
+                    traceback.print_exc()
+                    print("")
 
     def set_all(self):
         """ Sets logger level to ALL level """
         self.current_log_level = self.ALL
-        self.logger_note("Set log level to '{}' with value of {}. Displaying all log messages!".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}. Displaying all log messages!".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def set_debug(self):
         """ Sets logger level to DEBUG level """
         self.current_log_level = self.DEBUG
-        self.logger_note("Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def set_info(self):
         """ Sets logger level to INFO level """
         self.current_log_level = self.INFO
-        self.logger_note("Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def set_warning(self):
         """ Sets logger level to WARNING level """
         self.current_log_level = self.WARNING
-        self.logger_note("Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def set_error(self):
         """ Sets logger level to ERROR level """
         self.current_log_level = self.ERROR
-        self.logger_note("Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def set_critical(self):
         """ Sets logger level to CRITICAL level """
         self.current_log_level = self.CRITICAL
-        self.logger_note("Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
     def turn_off(self):
         """ Sets logger level to OFF level """
         self.current_log_level = self.OFF
-        self.logger_note("Set log level to '{}' with value of {}. So log messages are disabled!".format(self.current_log_level.name, self.current_log_level.value))
+        self.logger_note('INFO', "Set log level to '{}' with value of {}. All log messages are disabled!".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
 
-    def debug(self):
-        pass
+    def debug(self, message, desc=''):
+        self.add_to_log('DEBUG', message, desc)
 
-    def info(self):
-        pass
+    def info(self, message, desc=''):
+        self.add_to_log('INFO', message, desc)
 
-    def warning(self):
-        pass
+    def warning(self, message, desc=''):
+        self.add_to_log('WARNING', message, desc)
 
-    def error(self):
-        pass
+    def error(self, message, desc=''):
+        self.add_to_log('ERROR', message, desc)
 
-    def critical(self):
-        pass
+    def critical(self, message, desc=''):
+        self.add_to_log('CRITICAL', message, desc)
 
-    def logger_note(self, loglevel, message, desc='Logger'):
+    def logger_note(self, log_level, message, desc='Logger'):
         """ Used for logger own messages to avoid asking for supress_logger_notes all along the line """
         if not self.suppress_logger_notes:
-            self.add_to_log(loglevel, message, desc)
+            self.add_to_log(log_level, message, desc)
 
-    def add_to_log(self, loglevel, message, desc='', only_to_file=False):
-        """
-        if lvl (string) is at least the set loglevel message is printed and logged in the logFile if one is created
-        """
-        
-        min_length_message = 1
-        max_length_message = 125
-        max_desc_length = 25
+    def add_to_log(self, log_level, message, desc='', only_to_file=False):
 
-        print(loglevel + ' | ' + desc + ' | ' + message)
+        if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
+            self.logger_note('ERROR', "Unknown log level: {}".format(log_level))
+            return False
+
+        if vars(self)[log_level.upper()].value < self.current_log_level.value:  # if loglevel not high enough
+            return
+
+        # create log message
+        timestamp = ''
+        if self.time_stamp:
+            now = datetime.datetime.now()
+            timestamp = now.strftime('%d.%m.%Y') + ' ' + now.strftime('%H:%M') + ' | '
+        if not str(desc) == '' and str(desc)[-3:] != ' | ':  # second part especially needed when printing logFileBuffer
+            desc = str(desc) + ' | '
+
+        print(timestamp + log_level + ' | ' + desc + str(message))
+        # todo print to file
 
     def __str__(self):
         # todo
