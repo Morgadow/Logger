@@ -261,21 +261,25 @@ class Logger(Borg):
         self.current_log_level = self.INFO
         # self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
         self.logger_note('INFO', "Set log level to '{}'".format(self.current_log_level.name))
+
     def set_warning(self):
         """ Sets logger level to WARNING level """
         self.current_log_level = self.WARNING
         # self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
         self.logger_note('INFO', "Set log level to '{}'".format(self.current_log_level.name))
+
     def set_error(self):
         """ Sets logger level to ERROR level """
         self.current_log_level = self.ERROR
         # self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
         self.logger_note('INFO', "Set log level to '{}'".format(self.current_log_level.name))
+
     def set_critical(self):
         """ Sets logger level to CRITICAL level """
         self.current_log_level = self.CRITICAL
         # self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.current_log_level.name, self.current_log_level.value), desc='Logger')
         self.logger_note('INFO', "Set log level to '{}'".format(self.current_log_level.name))
+
     def turn_off(self):
         """ Sets logger level to OFF level """
         self.current_log_level = self.OFF
