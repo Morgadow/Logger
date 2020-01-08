@@ -2,11 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4f3ee467-5ea1-41f9-85df-36689cedb98d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/versions/2.2.7/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/versions/2.2.7/logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/versions/3.2.7/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/versions/3.2.7/logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/versions/4.0.2/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/versions/4.0.2/logger.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,18 +16,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="919">
-              <caret line="294" column="51" selection-start-line="294" selection-start-column="51" selection-end-line="294" selection-end-column="51" />
+            <state relative-caret-position="-442">
+              <caret line="129" column="37" selection-start-line="129" selection-start-column="37" selection-end-line="129" selection-end-column="37" />
               <folding>
-                <element signature="e#3430#3775#0" />
-                <element signature="e#3798#4446#0" />
-                <element signature="e#8247#8490#0" />
-                <element signature="e#8525#8742#0" />
-                <element signature="e#8776#8991#0" />
-                <element signature="e#9028#9249#0" />
-                <element signature="e#9284#9501#0" />
-                <element signature="e#9539#9762#0" />
-                <element signature="e#9796#10040#0" />
+                <element signature="e#25#34#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -39,8 +28,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
+            <state relative-caret-position="510">
+              <caret line="34" column="31" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="31" />
               <folding>
                 <element signature="e#25#50#0" expanded="true" />
               </folding>
@@ -51,7 +40,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/versions/3.2.7/logger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-4174">
+            <state relative-caret-position="5066">
               <caret line="301" column="15" selection-start-line="301" selection-start-column="15" selection-end-line="301" selection-end-column="15" />
             </state>
           </provider>
@@ -98,31 +87,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="Logger" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Logger" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Logger" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Logger" type="462c0819:PsiDirectoryNode" />
-              <item name="versions" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Logger" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Logger" type="462c0819:PsiDirectoryNode" />
-              <item name="versions" type="462c0819:PsiDirectoryNode" />
-              <item name="3.2.7" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -141,50 +106,6 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <module name="Logger" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="C:\Users\Simon\AppData\Local\Programs\Python\Python37-32\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="Logger" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="C:\Users\Simon\AppData\Local\Programs\Python\Python37-32\python.exe" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -196,6 +117,14 @@
       <option name="presentableId" value="Default" />
       <updated>1571673495119</updated>
     </task>
+    <task id="LOCAL-00001" summary="Adjusted spacing and naming according PEP8">
+      <created>1576669230238</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1576669230238</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -207,7 +136,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32936078" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3997833" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -222,19 +151,23 @@
       <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="3" side_tool="true" weight="0.32995737" />
     </layout>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Adjusted spacing and naming according PEP8" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adjusted spacing and naming according PEP8" />
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/testing.py" />
     <entry file="file://$PROJECT_DIR$/versions/3.2.7/logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4174">
+        <state relative-caret-position="5066">
           <caret line="301" column="15" selection-start-line="301" selection-start-column="15" selection-end-line="301" selection-end-column="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" column="29" selection-start-line="7" selection-start-column="29" selection-end-line="7" selection-end-column="29" />
+        <state relative-caret-position="510">
+          <caret line="34" column="31" selection-start-line="34" selection-start-column="31" selection-end-line="34" selection-end-column="31" />
           <folding>
             <element signature="e#25#50#0" expanded="true" />
           </folding>
@@ -243,18 +176,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="919">
-          <caret line="294" column="51" selection-start-line="294" selection-start-column="51" selection-end-line="294" selection-end-column="51" />
+        <state relative-caret-position="-442">
+          <caret line="129" column="37" selection-start-line="129" selection-start-column="37" selection-end-line="129" selection-end-column="37" />
           <folding>
-            <element signature="e#3430#3775#0" />
-            <element signature="e#3798#4446#0" />
-            <element signature="e#8247#8490#0" />
-            <element signature="e#8525#8742#0" />
-            <element signature="e#8776#8991#0" />
-            <element signature="e#9028#9249#0" />
-            <element signature="e#9284#9501#0" />
-            <element signature="e#9539#9762#0" />
-            <element signature="e#9796#10040#0" />
+            <element signature="e#25#34#0" expanded="true" />
           </folding>
         </state>
       </provider>

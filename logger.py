@@ -127,6 +127,8 @@ class Logger(MetaBorg):
         self.CRITICAL = LogLevel('CRITICAL', 50)
         self.OFF = LogLevel('OFF', MAX_LOG_LEVEL_VALUE)
 
+        self.start_time = time.time()
+
         self.suppress_logger_notes = suppressloggernotes
         self.__log_file_buffer = []
         self.time_stamp = addtimestamp
