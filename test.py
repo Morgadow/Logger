@@ -3,10 +3,6 @@
 from logger import Logger
 import os
 
-logger = Logger()
-print("logger 1")
-print(logger.__dict__)
-
 
 # # logger = Logger(loglvl='DEBUG', addtimestamp=True, suppressloggernotes=False, createlogfile=True, logpath=os.path.normpath("C:\Users\QXY5145\Desktop\Python_INI_Skript_V2"))
 # logger = Logger(loglvl='DEBUG', addtimestamp=True, suppressloggernotes=False, projectname="INI_TESTING BMU_R18", createlogfile=True, logpath=os.path.normpath("C:\\Users\\QXY5145\\Desktop\\Python_INI_Skript_V2\\logs"))
@@ -33,3 +29,19 @@ print(logger.__dict__)
 #
 # print("logger1")
 # print(logger.get_log_level())
+
+
+
+# logger 1
+# logger1 = Logger(level='DEBUG', suppressloggernotes=False)
+logger1 = Logger()
+print("logger1 level " + logger1.get_level()[0])
+print("suppresloggernotes logger1: " + str(logger1.suppress_logger_notes))
+# logger2 = Logger(level="ERROR")
+# logger2 = Logger(level="ERROR")
+logger3 = Logger(suppressloggernotes=False)
+logger2 = Logger(level="INFO")
+# logger2 = Logger()
+print("logger1 level " + logger1.get_level()[0])
+print("logger2 level " + logger2.get_level()[0])
+

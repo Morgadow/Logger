@@ -273,7 +273,7 @@ class Logger(Borg):
                     if not self.suppressloggernotes:
                         self.add_to_log('ERROR', "Input for desired log level not recognized! Took default log level: '{}'".format(self.__defaultLogLvl), desc='Logger')
 
-            else:  # self.current_log_level is not None
+            else:  # self.level is not None
             
                 if isinstance(loglvl, int) and loglvl in self.__possibleloglvlltostring:  # input integer
                     if self.currloglvl == loglvl:
@@ -419,9 +419,9 @@ class Logger(Borg):
                 pass
 
     # @property
-    # def current_log_level(self):
-    #     self.add_to_log('INFO',"Current Logger Level: ['{}', {}]".format(self.__possibleloglvlltostring[self.current_log_level],self.current_log_level), desc='Logger')
-    #     return self.__possibleloglvlltostring[self.current_log_level], self.current_log_level
+    # def level(self):
+    #     self.add_to_log('INFO',"Current Logger Level: ['{}', {}]".format(self.__possibleloglvlltostring[self.level],self.level), desc='Logger')
+    #     return self.__possibleloglvlltostring[self.level], self.level
 
     @property
     def possible_log_lvl(self):
