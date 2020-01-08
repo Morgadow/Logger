@@ -21,7 +21,7 @@ import datetime
 # version
 __major__ = 4       # for major interface/format changes
 __minor__ = 0       # for minor interface/format changes
-__release__ = 4     # for tweaks, bug-fixes, or development
+__release__ = 5     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
