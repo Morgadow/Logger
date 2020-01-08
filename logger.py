@@ -15,10 +15,12 @@ import datetime
 # todo remove custom log level
 # TODO jedesmal wenn eine neue logger klasse initialisiert wird werden die default einstellungen für alle geladen, das soll singleton verhalten haben stattdessen
 
+# todo in ordner mit _init__.py: starttime, version, date, author, ...
+
 # version
 __major__ = 4       # for major interface/format changes
 __minor__ = 0       # for minor interface/format changes
-__release__ = 1     # for tweaks, bug-fixes, or development
+__release__ = 3     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
@@ -53,6 +55,29 @@ class Borg:
             return 0
 
 
+class MetaBorg(type):
+    """
+    Borg monostate pattern for same logger class in whole project
+    Hint:
+    This is a different approach corresponding to: https://baites.github.io/computer-science/patterns/2018/06/11/python-borg-and-the-new-metaborg.html
+
+    Using the MetaBorg class skips init of logger/MetaBorg class if a instance already exists. In this case it is possible to use default var values
+    for first initialisation.
+
+    """
+    _state = {"__skip_init__": False}
+
+    def __call__(cls, *args, **kwargs):
+        # if cls._state['__skip_init__']:
+        #     cls.__check_args(*args, **kwargs)
+        # instance = object().__new__(cls, *args, **kwargs)
+        # instance.__dict__ = cls._state
+        if not cls._state['__skip_init__']:
+            instance.__init__(*args, **kwargs)
+            cls._state['__skip_init__'] = True
+        return instance
+
+
 class LogLevel:
     def __init__(self, name, value):
         """
@@ -76,7 +101,7 @@ class LogLevel:
         return '\n' + self.__str__() + '\n'
 
 
-class Logger(Borg):
+class Logger(MetaBorg):
     """
     Logger class with borg monostate pattern, so every instance shares same state throughout whole project
     Default log levels:
@@ -89,6 +114,7 @@ class Logger(Borg):
     OFF         : 100
     """
 
+    # def __init__(self, *args, **kwargs):
     def __init__(self, loglvl=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
         Borg.__init__(self)  # monostate
 
@@ -102,6 +128,7 @@ class Logger(Borg):
         self.OFF = LogLevel('OFF', MAX_LOG_LEVEL_VALUE)
 
         self.suppress_logger_notes = suppressloggernotes
+        self.__log_file_buffer = []
         self.time_stamp = addtimestamp
         self.__project_name = projectname  # shown in top line of logfile
 
@@ -114,7 +141,6 @@ class Logger(Borg):
                 self.log_path = os.path.normpath(os.path.abspath(logpath))
             self.__log_file_name = None
             self._log_file = None
-            self.__log_file_buffer = []
             self.__log_file_created = self.__init_log_file()
 
         # eval log level
