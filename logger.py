@@ -131,6 +131,7 @@ class Logger(Borg):
 
     # def __init__(self, *args, **kwargs):
     def __init__(self, level=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
+        """ Only creates instance with new settings if no instance was created in session, settings are stored in Borg superclass """
 
         Borg.__init__(self)  # monostate pattern
         if not self.__dict__:  # to avoid changing settings with every new instance through default values after one instance is created init will be skipped
@@ -181,7 +182,6 @@ class Logger(Borg):
 
         else:
             self._logger_note('DEBUG', "New instance created, but a borg version already exists. Inputs will be ignored!")
-
 
     def set_level(self, log_level):
         """
