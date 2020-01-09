@@ -310,7 +310,7 @@ class Logger(Borg):
                 self._logger_note('CRITICAL', traceback.format_exc())
                 print("")
         except Exception as e:
-            print("CRITICAL: While handling an execption another exception ocurred, will only printed to screen: " + str(e))
+            print("CRITICAL: While handling an exception another exception occurred, will only printed to screen: " + str(e))
             if with_tb:  # with traceback
                 import traceback
                 traceback.print_exc()
