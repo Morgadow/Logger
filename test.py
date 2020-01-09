@@ -46,7 +46,9 @@ import test2
 # print("logger1 level " + logger1.get_level()[0])
 # print("logger2 level " + logger2.get_level()[0])
 
-logger1 = Logger(level='ERROR')
+logger1 = Logger(level="DEBUG", createlogfile=True, projectname='Just_Testing')
+logger2 = Logger(level="ERROR")
 print("logger1 : " + str(logger1.get_level()[0]))
 test2.call_new_logger()
 print("logger1 : " + str(logger1.get_level()[0]))
+

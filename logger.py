@@ -17,19 +17,20 @@ import datetime
 # todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
 # todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen
 # todo test for other class using borg pattern --> raise runtimeError
+# todo logfilename
+# todo logfile with full path accepted as input, sets path and filename
 
 # version
 __major__ = 4       # for major interface/format changes
 __minor__ = 0       # for minor interface/format changes
-__release__ = 5     # for tweaks, bug-fixes, or development
+__release__ = 6     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
 
 
-MIN_LOG_LEVEL_VALUE = 0
-MAX_LOG_LEVEL_VALUE = 100
-#todo description
+##################
+# Default logger settings
 DEFAULT_LOG_LEVEL = 'INFO'
 DEFAULT_PROJECT_NAME = None
 DEFAULT_CREATE_LOG_FILE = False
@@ -37,7 +38,11 @@ DEFAULT_LOG_PATH = None
 DEFAULT_ADD_TIME_STAMP = False
 DEFAULT_SUPRESS_LOGGER_NOTES = False
 
-# todo default logmessage length, with 0 as unlimited
+MIN_LOG_LEVEL_VALUE = 0
+MAX_LOG_LEVEL_VALUE = 100
+MAX_LOG_MESSAGE_LENGTH = 0  # number of characters, 0 for unlimited
+##################
+
 
 
 class Borg:
@@ -88,17 +93,18 @@ class MetaBorg(type):
 
 
 class LogLevel:
+    """ Holding possible log level with name and numeric equivalent """
+
     def __init__(self, name, value):
         """
-        Loglevel class for possible log level attributes
         :param name: String, name of log level, will be converted to uppercase
         :param value: Integer, Value representative
         """
 
         if not isinstance(name, str):
             raise TypeError('Name of log level should be a string!')
-        if not isinstance(value, int):
-            raise TypeError('Value of log level should be a integer!')
+        if not isinstance(value, int) or value < 0:
+            raise TypeError('Value of log level should be a positive integer!')
 
         self.name = name.upper()
         self.value = value
@@ -148,7 +154,7 @@ class Logger(Borg):
             self.suppress_logger_notes = suppressloggernotes
             self.__log_file_buffer = []
             self.time_stamp = addtimestamp
-            self.__project_name = projectname  # shown in top line of logfile
+            self.__project_name = projectname  # shown in top line of logfile and name of logfile
 
             # create logfile
             self.create_log_file = createlogfile
@@ -163,21 +169,20 @@ class Logger(Borg):
 
             # eval log level
             self.level = vars(self)[DEFAULT_LOG_LEVEL]  # set initial log level
-            result = self.set_level(level)
-            if not result:
+            if not self.set_level(level):
                 self._logger_note('INFO', "Set log level to default log level: " + str(self.level.name))
 
-            # would maybe fail before this line but who knows ...
+            # would propably fail before this line but who knows ...
             if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
                 if not self.suppress_logger_notes:
-                    self._logger_note('WARNING', "Designed for Python 3.7, might fail!")
+                    self._logger_note('WARNING', "Designed for Python 3.7, might cause problems!")
 
             # print buffer
-            if len(self.__log_file_buffer) > 0:
+            if len(self.__log_file_buffer):
                 for message in self.__log_file_buffer:
                     self._logger_note(message[0], message[1])
+                self._logger_note('DEBUG', "Printed {} lines of log file buffer".format(len(self.__log_file_buffer)))
                 self.__log_file_buffer = []
-                self._logger_note('DEBUG', "Printed log file buffer")
             self._logger_note('INFO', "Logger ready!")
 
         else:
@@ -386,12 +391,18 @@ class Logger(Borg):
         :return: None
         """
 
+        # todo handler if message not utf-8 encoded
+
         if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
             self._logger_note('ERROR', "Unknown log level: {}".format(log_level))
-            return False
+            return
 
         if vars(self)[log_level.upper()].value < self.level.value:  # if loglevel not high enough
             return
+
+        if MAX_LOG_MESSAGE_LENGTH != 0 and len(str(message)) > MAX_LOG_MESSAGE_LENGTH:
+            message = message[:100]
+            self._logger_note('DEBUG', "Log message exceeded maximum length of {} characters and was shorted".format(MAX_LOG_MESSAGE_LENGTH))
 
         # create log message
         delim = ' | '
