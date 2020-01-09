@@ -184,30 +184,9 @@ class Logger(Borg):
                 self.__log_file_buffer = []
             self._logger_note('INFO', "Logger ready!")
 
-            try:
-                result = 7 / 0
-            except Exception as e:
-                self.__handle_excep(e, with_tb=True)
-
         else:
+            self._logger_note('DEBUG', "New instance created, but a borg version already exists. Inputs will be ignored!")
 
-            # check if user tried to create instance with different settings, print warning, dont use inputs
-            input_found = False # todo change to dict or similar, this is not nice!
-            if level.upper() != self.level.name:
-                input_found = True
-            if projectname != DEFAULT_PROJECT_NAME:
-                input_found = True
-            if createlogfile != DEFAULT_CREATE_LOG_FILE:
-                input_found = True
-            if logpath != DEFAULT_LOG_PATH:
-                input_found = True
-            if addtimestamp != DEFAULT_ADD_TIME_STAMP:
-                input_found = True
-            if suppressloggernotes != DEFAULT_SUPRESS_LOGGER_NOTES:
-                input_found = True
-
-            if input_found:
-                self._logger_note('WARNING', "Attempt to create an instance with changed settings, but a borg version already exists. Inputs will be ignored!")
 
     def set_level(self, log_level):
         """

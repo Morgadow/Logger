@@ -2,7 +2,6 @@
 
 from logger import Logger
 import os
-import test2
 
 
 # # logger = Logger(loglvl='DEBUG', addtimestamp=True, suppressloggernotes=False, createlogfile=True, logpath=os.path.normpath("C:\Users\QXY5145\Desktop\Python_INI_Skript_V2"))
@@ -48,7 +47,5 @@ import test2
 
 logger1 = Logger(level="DEBUG", createlogfile=True, projectname='Just_Testing')
 logger2 = Logger(level="ERROR")
-print("logger1 : " + str(logger1.get_level()[0]))
-test2.call_new_logger()
 print("logger1 : " + str(logger1.get_level()[0]))
 
