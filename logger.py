@@ -27,6 +27,7 @@ __release__ = 6     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
+__date__ = '21.05.2019'
 
 
 ##################
@@ -42,7 +43,6 @@ MIN_LOG_LEVEL_VALUE = 0
 MAX_LOG_LEVEL_VALUE = 100
 MAX_LOG_MESSAGE_LENGTH = 0  # number of characters, 0 for unlimited length
 ##################
-
 
 
 class Borg:

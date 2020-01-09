@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="4f3ee467-5ea1-41f9-85df-36689cedb98d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/logger.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +15,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="348">
-              <caret line="314" column="36" selection-start-line="314" selection-start-column="36" selection-end-line="314" selection-end-column="36" />
+            <state relative-caret-position="603">
+              <caret line="312" column="56" selection-start-line="312" selection-start-column="56" selection-end-line="312" selection-end-column="56" />
               <folding>
                 <element signature="e#25#34#0" expanded="true" />
                 <element signature="e#8731#13032#0" />
@@ -188,7 +187,14 @@
       <option name="project" value="LOCAL" />
       <updated>1578564790778</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="prints stacktrace of exceptions to file">
+      <created>1578565888800</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1578565888800</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -251,18 +257,8 @@
     <MESSAGE value="Bugfixing, tested logger over multiple packages" />
     <MESSAGE value="updated version number" />
     <MESSAGE value="Integrated max message length" />
-    <option name="LAST_COMMIT_MESSAGE" value="Integrated max message length" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/logger.py</url>
-          <line>313</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="prints stacktrace of exceptions to file" />
+    <option name="LAST_COMMIT_MESSAGE" value="prints stacktrace of exceptions to file" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/testing.py" />
@@ -299,8 +295,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="348">
-          <caret line="314" column="36" selection-start-line="314" selection-start-column="36" selection-end-line="314" selection-end-column="36" />
+        <state relative-caret-position="603">
+          <caret line="312" column="56" selection-start-line="312" selection-start-column="56" selection-end-line="312" selection-end-column="56" />
           <folding>
             <element signature="e#25#34#0" expanded="true" />
             <element signature="e#8731#13032#0" />
