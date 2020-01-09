@@ -17,7 +17,7 @@ import datetime
 # todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
 # todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen
 # todo test for other class using borg pattern --> raise runtimeError
-# todo logfilename
+# todo logfilenamen as input
 # todo logfile with full path accepted as input, sets path and filename
 
 # version
@@ -40,7 +40,7 @@ DEFAULT_SUPRESS_LOGGER_NOTES = False
 
 MIN_LOG_LEVEL_VALUE = 0
 MAX_LOG_LEVEL_VALUE = 100
-MAX_LOG_MESSAGE_LENGTH = 0  # number of characters, 0 for unlimited
+MAX_LOG_MESSAGE_LENGTH = 0  # number of characters, 0 for unlimited length
 ##################
 
 
@@ -174,8 +174,7 @@ class Logger(Borg):
 
             # would propably fail before this line but who knows ...
             if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
-                if not self.suppress_logger_notes:
-                    self._logger_note('WARNING', "Designed for Python 3.7, might cause problems!")
+                self._logger_note('WARNING', "Designed for Python 3.7, might cause problems!")
 
             # print buffer
             if len(self.__log_file_buffer):
@@ -184,6 +183,11 @@ class Logger(Borg):
                 self._logger_note('DEBUG', "Printed {} lines of log file buffer".format(len(self.__log_file_buffer)))
                 self.__log_file_buffer = []
             self._logger_note('INFO', "Logger ready!")
+
+            try:
+                result = 7 / 0
+            except Exception as e:
+                self.__handle_excep(e, with_tb=True)
 
         else:
 
@@ -299,19 +303,18 @@ class Logger(Borg):
 
     def __handle_excep(self, exception, with_tb=True):
         """ prints exception """
-        if not self.suppress_logger_notes:
-            try:
-                self._logger_note('CRITICAL', "{}".format(exception), desc='Logger')
-                if with_tb:  # with traceback
-                    import traceback
-                    traceback.print_exc()
-                    print("")
-            except Exception as e:
-                print(e)
-                if with_tb:  # with traceback
-                    import traceback
-                    traceback.print_exc()
-                    print("")
+        try:
+            self._logger_note('CRITICAL', "{}".format(exception), desc='Logger')
+            if with_tb:  # with traceback
+                import traceback
+                self._logger_note('CRITICAL', traceback.format_exc())
+                print("")
+        except Exception as e:
+            print("CRITICAL: While handling an execption another exception ocurred, will only printed to screen: " + str(e))
+            if with_tb:  # with traceback
+                import traceback
+                traceback.print_exc()
+                print("")
 
     def set_all(self):
         """ Sets logger level to ALL level """
