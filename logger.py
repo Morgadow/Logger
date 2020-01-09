@@ -23,7 +23,7 @@ import datetime
 # version
 __major__ = 4       # for major interface/format changes
 __minor__ = 0       # for minor interface/format changes
-__release__ = 6     # for tweaks, bug-fixes, or development
+__release__ = 7     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
@@ -33,11 +33,6 @@ __date__ = '21.05.2019'
 ##################
 # Default logger settings
 DEFAULT_LOG_LEVEL = 'INFO'
-DEFAULT_PROJECT_NAME = None
-DEFAULT_CREATE_LOG_FILE = False
-DEFAULT_LOG_PATH = None
-DEFAULT_ADD_TIME_STAMP = False
-DEFAULT_SUPRESS_LOGGER_NOTES = False
 
 MIN_LOG_LEVEL_VALUE = 0
 MAX_LOG_LEVEL_VALUE = 100
@@ -135,7 +130,7 @@ class Logger(Borg):
     """
 
     # def __init__(self, *args, **kwargs):
-    def __init__(self, level=DEFAULT_LOG_LEVEL, projectname=DEFAULT_PROJECT_NAME, createlogfile=DEFAULT_CREATE_LOG_FILE, logpath=DEFAULT_LOG_PATH, addtimestamp=DEFAULT_ADD_TIME_STAMP, suppressloggernotes=DEFAULT_SUPRESS_LOGGER_NOTES):
+    def __init__(self, level=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
 
         Borg.__init__(self)  # monostate pattern
         if not self.__dict__:  # to avoid changing settings with every new instance through default values after one instance is created init will be skipped
