@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4f3ee467-5ea1-41f9-85df-36689cedb98d" name="Default Changelist" comment="added date to version info, spelling corrections">
-      <change beforePath="$PROJECT_DIR$/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/logger.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/test.py" afterDir="false" />
-    </list>
+    <list default="true" id="4f3ee467-5ea1-41f9-85df-36689cedb98d" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/logger.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="127">
-              <caret line="188" selection-start-line="188" selection-end-line="188" />
+            <state relative-caret-position="986">
+              <caret line="184" selection-start-line="184" selection-end-line="184" />
               <folding>
                 <element signature="e#25#34#0" expanded="true" />
                 <element signature="e#8731#13032#0" />
@@ -200,7 +197,28 @@
       <option name="project" value="LOCAL" />
       <updated>1578566131633</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="no more testing for changed settings with new instance">
+      <created>1578572832809</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1578572832809</updated>
+    </task>
+    <task id="LOCAL-00011" summary="cleaning code">
+      <created>1578572921892</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1578572921892</updated>
+    </task>
+    <task id="LOCAL-00012" summary="description updated">
+      <created>1578573052808</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1578573052808</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TodoView" selected-index="4">
@@ -265,7 +283,10 @@
     <MESSAGE value="Integrated max message length" />
     <MESSAGE value="prints stacktrace of exceptions to file" />
     <MESSAGE value="added date to version info, spelling corrections" />
-    <option name="LAST_COMMIT_MESSAGE" value="added date to version info, spelling corrections" />
+    <MESSAGE value="no more testing for changed settings with new instance" />
+    <MESSAGE value="cleaning code" />
+    <MESSAGE value="description updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="description updated" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/testing.py" />
@@ -302,8 +323,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="127">
-          <caret line="188" selection-start-line="188" selection-end-line="188" />
+        <state relative-caret-position="986">
+          <caret line="184" selection-start-line="184" selection-end-line="184" />
           <folding>
             <element signature="e#25#34#0" expanded="true" />
             <element signature="e#8731#13032#0" />
