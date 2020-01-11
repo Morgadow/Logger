@@ -45,7 +45,14 @@ import os
 # print("logger1 level " + logger1.get_level()[0])
 # print("logger2 level " + logger2.get_level()[0])
 
-logger1 = Logger(level="DEBUG", createlogfile=True, projectname='Just_Testing')
-logger2 = Logger(level="ERROR")
-print("logger1 : " + str(logger1.get_level()[0]))
+# # logger1 = Logger(level="DEBUG", createlogfile=True, projectname='Just_Testing')
+# logger1 = Logger(level="DEBUG", addtimestamp=True)
+# # logger2 = Logger(level="ERROR")
+# print("logger1 : " + str(logger1.get_level()[0]))
+# # logger1.info("hier ist eine nachricht die länger als die maximal zulässige nachrichten länge ist, beziehungsweise hoffe ich das in diesem fall!")
+# logger1.formatter(delim=' : ')
+# print(logger1._format)
 
+# logger1 = Logger(level='debug')
+# logger1.error("Errro message")
+Logger.static_debug("debug message", desc="Loggerino")

@@ -11,19 +11,22 @@ import datetime
 # Date: 21.05.2019          #
 #############################
 
+# todo integrate only to file everywhere
+# todo test dauer static_debug vs debug
 
 # todo add custom log level
 # todo remove custom log level
 # todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
-# todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen
-# todo test for other class using borg pattern --> raise runtimeError
+# todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen, delim als input
+# todo test for other class using borg pattern --> raise runtimeError --> keine lösung gefunden wie das gehen soll
 # todo logfilenamen as input
 # todo logfile with full path accepted as input, sets path and filename
+# todo alle nachrichten in init in logfilebuffer schreiben, nichts davor ausgeben, loglevel als letztes EINSTELLEN, danach drucken
 
 # version
 __major__ = 4       # for major interface/format changes
-__minor__ = 0       # for minor interface/format changes
-__release__ = 7     # for tweaks, bug-fixes, or development
+__minor__ = 1       # for minor interface/format changes
+__release__ = 0     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
@@ -36,7 +39,7 @@ DEFAULT_LOG_LEVEL = 'INFO'
 
 MIN_LOG_LEVEL_VALUE = 0
 MAX_LOG_LEVEL_VALUE = 100
-MAX_LOG_MESSAGE_LENGTH = 0  # number of characters, 0 for unlimited length
+MAX_LOG_MESSAGE_LENGTH = 0  # maximum number of characters, 0 for unlimited length, can't be less than 75
 ##################
 
 
@@ -64,27 +67,40 @@ class Borg:
             return 0
 
 
-class MetaBorg(type):
-    """
-    Borg monostate pattern for same logger class in whole project
-    Hint:
-    This is a different approach corresponding to: https://baites.github.io/computer-science/patterns/2018/06/11/python-borg-and-the-new-metaborg.html
+# class MetaBorg(type):
+#     """
+#     Borg monostate pattern for same logger class in whole project
+#     Hint:
+#     This is a different approach corresponding to: https://baites.github.io/computer-science/patterns/2018/06/11/python-borg-and-the-new-metaborg.html
+#
+#     Using the MetaBorg class skips init of logger/MetaBorg class if a instance already exists. In this case it is possible to use default var values
+#     for first initialisation.
+#
+#     """
+#     _state = {"__skip_init__": False}
+#
+#     def __call__(cls, *args, **kwargs):
+#         if cls._state['__skip_init__']:
+#             cls.__check_args(*args, **kwargs)
+#         instance = object().__new__(cls, *args, **kwargs)
+#         instance.__dict__ = cls._state
+#         if not cls._state['__skip_init__']:
+#             instance.__init__(*args, **kwargs)
+#             cls._state['__skip_init__'] = True
+#         return instance
 
-    Using the MetaBorg class skips init of logger/MetaBorg class if a instance already exists. In this case it is possible to use default var values
-    for first initialisation.
 
-    """
-    _state = {"__skip_init__": False}
+class SettingsGroup:
+    """ Some Dummy class for grouping settings """
 
-    def __call__(cls, *args, **kwargs):
-        if cls._state['__skip_init__']:
-            cls.__check_args(*args, **kwargs)
-        instance = object().__new__(cls, *args, **kwargs)
-        instance.__dict__ = cls._state
-        if not cls._state['__skip_init__']:
-            instance.__init__(*args, **kwargs)
-            cls._state['__skip_init__'] = True
-        return instance
+    def __str__(self):
+        str_eq = ''
+        for elem in self.__dict__:
+            str_eq = str_eq + elem + ': ' + str(self.__dict__[elem]) + '\n'
+        return str_eq
+
+    def __repr__(self):
+        return '\n' + str(self.__str__()) + '\n'
 
 
 class LogLevel:
@@ -156,19 +172,23 @@ class Logger(Borg):
 
             # create logfile
             self.create_log_file = createlogfile
-            self.__log_file_created = False
+            self._log_file_created = False
             if self.create_log_file:
                 self.log_path = logpath
                 if self.log_path is not None:
                     self.log_path = os.path.normpath(os.path.abspath(logpath))
                 self.__log_file_name = None
                 self._log_file = None
-                self.__log_file_created = self.__init_log_file()
+                self._log_file_created = self.__init_log_file()
 
             # eval log level
             self.level = vars(self)[DEFAULT_LOG_LEVEL]  # set initial log level
             if not self.set_level(level):
                 self._logger_note('INFO', "Set log level to default log level: " + str(self.level.name))
+
+            self._format = SettingsGroup()  # todo # todo nach oben
+            self.formatter()
+            # self._format = self.formatter()
 
             # would propably fail before this line but who knows ...
             if str(sys.version_info[0]) + '.' + str(sys.version_info[1]) != "3.7":
@@ -206,7 +226,7 @@ class Logger(Borg):
     def __init_log_file(self):
         """
         Initializes log file, as logpath default is skriptpath + 'logs', filename is generated based on project name, time and date
-        :return: Boolean, True if file is generated sucessfully
+        :return: Boolean, True if file is generated successfully
         """
         try:
             if self.log_path is None:  # then take default path:
@@ -289,6 +309,15 @@ class Logger(Borg):
                 traceback.print_exc()
                 print("")
 
+    def formatter(self, delim=' | ', timeformat='%d.%m.%Y %H:%M'):
+        # todo reihenfolge
+        # todo check delim
+        # todo check timeformat
+
+        self._format.delim = delim
+        self._format.timeformat = timeformat
+
+
     def set_all(self):
         """ Sets logger level to ALL level """
         self.level = self.ALL
@@ -331,20 +360,55 @@ class Logger(Borg):
         # self.logger_note('INFO', "Set log level to '{}' with value of {}".format(self.level.name, self.level.value), desc='Logger')
         self._logger_note('INFO', "Set log level to '{}'. All log messages are disabled".format(self.level.name))
 
-    def debug(self, message, desc=''):
-        self.add_to_log('DEBUG', message, desc)
+    def debug(self, message, desc='', file_only=False):
+        """ Adds log message with level DEBUG to log """
+        self.add_to_log('DEBUG', message, desc=desc, file_only=file_only)
 
-    def info(self, message, desc=''):
-        self.add_to_log('INFO', message, desc)
+    def info(self, message, desc='', file_only=False):
+        """ Adds log message with level INFO to log """
+        self.add_to_log('INFO', message, desc=desc, file_only=file_only)
 
-    def warning(self, message, desc=''):
-        self.add_to_log('WARNING', message, desc)
+    def warning(self, message, desc='', file_only=False):
+        """ Adds log message with level WARNING to log """
+        self.add_to_log('WARNING', message, desc=desc, file_only=file_only)
 
-    def error(self, message, desc=''):
-        self.add_to_log('ERROR', message, desc)
+    def error(self, message, desc='', file_only=False):
+        """ Adds log message with level ERROR to log """
+        self.add_to_log('ERROR', message, desc=desc, file_only=file_only)
 
-    def critical(self, message, desc=''):
-        self.add_to_log('CRITICAL', message, desc)
+    def critical(self, message, desc='', file_only=False):
+        """ Adds log message with level CRITICAL log """
+        self.add_to_log('CRITICAL', message, desc=desc, file_only=file_only)
+
+    @staticmethod
+    def static_debug(message, desc='', file_only=False):
+        """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+        stat_logger = Logger()
+        stat_logger.debug(message, desc=desc, file_only=file_only)
+
+    @staticmethod
+    def static_info(message, desc='', file_only=False):
+        """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+        stat_logger = Logger()
+        stat_logger.info(message, desc=desc, file_only=file_only)
+
+    @staticmethod
+    def static_warning(message, desc='', file_only=False):
+        """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+        stat_logger = Logger()
+        stat_logger.warning(message, desc=desc, file_only=file_only)
+
+    @staticmethod
+    def static_error(message, desc='', file_only=False):
+        """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+        stat_logger = Logger()
+        stat_logger.error(message, desc=desc, file_only=file_only)
+
+    @staticmethod
+    def static_critical(message, desc='', file_only=False):
+        """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+        stat_logger = Logger()
+        stat_logger.critical(message, desc=desc, file_only=file_only)
 
     def _logger_note(self, log_level, message, desc='Logger'):
         """
@@ -357,13 +421,13 @@ class Logger(Borg):
         if not self.suppress_logger_notes:
             self.add_to_log(log_level, message, desc)
 
-    def add_to_log(self, log_level, message, desc='', only_to_file=False):
+    def add_to_log(self, log_level, message, desc='', file_only=False):
         """
         Prints to screen and saves in log file
         :param log_level: String, name of loglevel, decides if message is printed and saved
         :param message: String, message to print
         :param desc: String, small description to mark what type of message, default: 'Logger'
-        :param only_to_file: Boolean, prints only to file if True
+        :param file_only: Boolean, prints only to file if True
         :return: None
         """
 
@@ -376,8 +440,9 @@ class Logger(Borg):
         if vars(self)[log_level.upper()].value < self.level.value:  # if loglevel not high enough
             return
 
-        if MAX_LOG_MESSAGE_LENGTH != 0 and len(str(message)) > MAX_LOG_MESSAGE_LENGTH:
-            message = message[:100]
+        # messsage to long
+        if 0 < MAX_LOG_MESSAGE_LENGTH < len(str(message)):
+            message = message[:MAX_LOG_MESSAGE_LENGTH]
             self._logger_note('DEBUG', "Log message exceeded maximum length of {} characters and was shorted".format(MAX_LOG_MESSAGE_LENGTH))
 
         # create log message
@@ -386,13 +451,14 @@ class Logger(Borg):
         if self.time_stamp:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d.%m.%Y') + ' ' + now.strftime('%H:%M') + delim
+            timestamp = now.strftime(self._format.timeformat)
         if not str(desc) == '' and str(desc)[-(len(delim)):] != delim:  # second part especially needed when printing logFileBuffer
             desc = str(desc) + delim
         log_message = timestamp + log_level + delim + desc + str(message)
 
-        if not only_to_file:
+        if not file_only:
             print(log_message)
-        if self.create_log_file and self.__log_file_created:
+        if self.create_log_file and self._log_file_created:
             try:
                 with open(self._log_file, 'a') as log_file:
                     log_file.write(log_message + '\n')
