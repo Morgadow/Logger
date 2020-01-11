@@ -53,6 +53,6 @@ import os
 # logger1.formatter(delim=' : ')
 # print(logger1._format)
 
-# logger1 = Logger(level='debug')
-# logger1.error("Errro message")
+logger1 = Logger(level='debug')
+logger1.error("Errro message")
 Logger.static_debug("debug message", desc="Loggerino")

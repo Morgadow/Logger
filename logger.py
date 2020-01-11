@@ -317,7 +317,6 @@ class Logger(Borg):
         self._format.delim = delim
         self._format.timeformat = timeformat
 
-
     def set_all(self):
         """ Sets logger level to ALL level """
         self.level = self.ALL
@@ -434,8 +433,9 @@ class Logger(Borg):
         # todo handler if message not utf-8 encoded
 
         if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
-            self._logger_note('ERROR', "Unknown log level: {}".format(log_level))
-            return
+            # self._logger_note('ERROR', "Unknown log level: {}".format(log_level))
+            # return
+            raise ValueError("Unknown log level: {}".format(log_level))
 
         if vars(self)[log_level.upper()].value < self.level.value:  # if loglevel not high enough
             return
@@ -451,7 +451,7 @@ class Logger(Borg):
         if self.time_stamp:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d.%m.%Y') + ' ' + now.strftime('%H:%M') + delim
-            timestamp = now.strftime(self._format.timeformat)
+            # timestamp = now.strftime(self._format.timeformat)  # todo
         if not str(desc) == '' and str(desc)[-(len(delim)):] != delim:  # second part especially needed when printing logFileBuffer
             desc = str(desc) + delim
         log_message = timestamp + log_level + delim + desc + str(message)
