@@ -14,6 +14,7 @@ import datetime
 # todo integrate only to file everywhere
 # todo test dauer static_debug vs debug
 
+# todo rename existing logfile
 # todo add custom log level
 # todo remove custom log level
 # todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
