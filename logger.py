@@ -14,7 +14,6 @@ import datetime
 # todo integrate only to file everywhere
 # todo test dauer static_debug vs debug
 
-# todo rename existing logfile
 # todo add custom log level
 # todo remove custom log level
 # todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
@@ -27,7 +26,7 @@ import datetime
 # version
 __major__ = 4       # for major interface/format changes
 __minor__ = 1       # for minor interface/format changes
-__release__ = 0     # for tweaks, bug-fixes, or development
+__release__ = 1     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
 __author__ = 'Simon Schmid'
@@ -296,23 +295,25 @@ class Logger(Borg):
             self.__handle_excep(e)
             return False
 
-    def rename_logfile(self, new_name, ):
+    def rename_logfile(self, new_name, logfile_ext='.log', char_restiction=True):
         """
         Renames log file
         :param new_name: String, new name with a maximum length defined in MAX_LENGTH_LOGFILE_NAME
+        :param logfile_ext: String, Optional log file extension, should be '.log'
+        :param char_restiction: Boolean, if true restricts use of chars forbidden in windows filenames
         :return: None
         """
         if not isinstance(new_name, str) or len(new_name) > MAX_LENGTH_LOGFILE_NAME:
             raise ValueError("New logfilename must be a string with a maximum length of {}".format(MAX_LENGTH_LOGFILE_NAME))
         forbidden_chars = set("\\:'´`\"$§&/=")
-        if any((c in forbidden_chars) for c in new_name):
+        if char_restiction and any((c in forbidden_chars) for c in new_name):
             raise ValueError("Forbidden character in new name, won't proceed!")
 
         try:
             if len(new_name.split('.')) > 1 and (new_name.split('.')[-1] == 'log' or new_name.split('.')[-1] == 'txt'):
                 new_name = new_name.split('.')[0]
-                self._logger_note('DEBUG', "Deleted extension for new logfile name, file format .log ist used for log files")
-            new_name = new_name + '.log'
+                self._logger_note('DEBUG', "Deleted extension for new logfile name, file format {} ist used for log files".format(logfile_ext))
+            new_name = new_name + logfile_ext
             if os.path.exists(os.path.join(self.log_path, new_name)):
                 self._logger_note('ERROR', "A file file with name {} already exists in directory! Can't rename logfile!".format(new_name))
                 return
