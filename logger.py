@@ -40,6 +40,7 @@ DEFAULT_LOG_LEVEL = 'INFO'
 MIN_LOG_LEVEL_VALUE = 0
 MAX_LOG_LEVEL_VALUE = 100
 MAX_LOG_MESSAGE_LENGTH = 0  # maximum number of characters, 0 for unlimited length, can't be less than 75
+MAX_LENGTH_LOGFILE_NAME = 75  # maximum length of new logfilename in method rename_logfile
 ##################
 
 
@@ -220,7 +221,7 @@ class Logger(Borg):
             return False
 
     def get_level(self):
-        """ Returns current log level """
+        """ Returns current log level [String loglevel, Integer loglevel int equivalent]"""
         return self.level.name, self.level.value
 
     def __init_log_file(self):
@@ -293,6 +294,37 @@ class Logger(Borg):
             self.create_log_file = False
             self.__handle_excep(e)
             return False
+
+    def rename_logfile(self, new_name, ):
+        """
+        Renames log file
+        :param new_name: String, new name with a maximum length defined in MAX_LENGTH_LOGFILE_NAME
+        :return: None
+        """
+        if not isinstance(new_name, str) or len(new_name) > MAX_LENGTH_LOGFILE_NAME:
+            raise ValueError("New logfilename must be a string with a maximum length of {}".format(MAX_LENGTH_LOGFILE_NAME))
+        forbidden_chars = set("\\:'´`\"$§&/=")
+        if any((c in forbidden_chars) for c in new_name):
+            raise ValueError("Forbidden character in new name, won't proceed!")
+
+        try:
+            if len(new_name.split('.')) > 1 and (new_name.split('.')[-1] == 'log' or new_name.split('.')[-1] == 'txt'):
+                new_name = new_name.split('.')[0]
+                self._logger_note('DEBUG', "Deleted extension for new logfile name, file format .log ist used for log files")
+            new_name = new_name + '.log'
+            if os.path.exists(os.path.join(self.log_path, new_name)):
+                self._logger_note('ERROR', "A file file with name {} already exists in directory! Can't rename logfile!".format(new_name))
+                return
+
+            os.rename(self._log_file, os.path.join(self.log_path, new_name))
+            if not os.path.isfile(os.path.join(self.log_path, new_name)):
+                self._logger_note('ERROR', "Could not rename log file from '{}' to '{}'".format(self.__log_file_name, new_name))
+            else:
+                self._logger_note('INFO', "Successfully Renamed logfile from '{}' to '{}'".format(self.__log_file_name, new_name))
+                self.__log_file_name = new_name
+                self._log_file = os.path.join(self.log_path, new_name)
+        except Exception as e:
+            self.__handle_excep(e)
 
     def __handle_excep(self, exception, with_tb=True):
         """ prints exception """
@@ -383,30 +415,35 @@ class Logger(Borg):
     def static_debug(message, desc='', file_only=False):
         """ creates temp logger class instance and writes log message, should only used if a instance was created before """
         stat_logger = Logger()
+        stat_logger.warning("Method is deprecated and will be removed in later releases, use module level methode instead!")
         stat_logger.debug(message, desc=desc, file_only=file_only)
 
     @staticmethod
     def static_info(message, desc='', file_only=False):
         """ creates temp logger class instance and writes log message, should only used if a instance was created before """
         stat_logger = Logger()
+        stat_logger.warning("Method is deprecated and will be removed in later releases, use module level methode instead!")
         stat_logger.info(message, desc=desc, file_only=file_only)
 
     @staticmethod
     def static_warning(message, desc='', file_only=False):
         """ creates temp logger class instance and writes log message, should only used if a instance was created before """
         stat_logger = Logger()
+        stat_logger.warning("Method is deprecated and will be removed in later releases, use module level methode instead!")
         stat_logger.warning(message, desc=desc, file_only=file_only)
 
     @staticmethod
     def static_error(message, desc='', file_only=False):
         """ creates temp logger class instance and writes log message, should only used if a instance was created before """
         stat_logger = Logger()
+        stat_logger.warning("Method is deprecated and will be removed in later releases, use module level methode instead!")
         stat_logger.error(message, desc=desc, file_only=file_only)
 
     @staticmethod
     def static_critical(message, desc='', file_only=False):
         """ creates temp logger class instance and writes log message, should only used if a instance was created before """
         stat_logger = Logger()
+        stat_logger.warning("Method is deprecated and will be removed in later releases, use module level methode instead!")
         stat_logger.critical(message, desc=desc, file_only=file_only)
 
     def _logger_note(self, log_level, message, desc='Logger'):
@@ -466,8 +503,38 @@ class Logger(Borg):
                 self.__handle_excep(e)
 
     def __str__(self):
-        # todo
+        # todo better formatting
         return "Logger with settings: {}".format(self.__dict__)
 
     def __repr__(self):
         return '\n' + self.__str__() + '\n'
+
+
+def static_debug(message, desc='', file_only=False):
+    """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+    stat_logger = Logger()
+    stat_logger.debug(message, desc=desc, file_only=file_only)
+
+
+def static_info(message, desc='', file_only=False):
+    """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+    stat_logger = Logger()
+    stat_logger.info(message, desc=desc, file_only=file_only)
+
+
+def static_warning(message, desc='', file_only=False):
+    """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+    stat_logger = Logger()
+    stat_logger.warning(message, desc=desc, file_only=file_only)
+
+
+def static_error(message, desc='', file_only=False):
+    """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+    stat_logger = Logger()
+    stat_logger.error(message, desc=desc, file_only=file_only)
+
+
+def static_critical(message, desc='', file_only=False):
+    """ creates temp logger class instance and writes log message, should only used if a instance was created before """
+    stat_logger = Logger()
+    stat_logger.critical(message, desc=desc, file_only=file_only)
