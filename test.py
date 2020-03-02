@@ -53,7 +53,11 @@ import os
 # logger1.formatter(delim=' : ')
 # print(logger1._format)
 
+# test method rename logfile
 # logger1 = logger.Logger(level='debug', createlogfile=True)
-logger1 = logger.Logger(level='debug', createlogfile=True, logpath="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs")
-logger.static_debug("debug message", desc="Loggerino")
-logger1.rename_logfile("new_log_file_name2.log")
+# logger1 = logger.Logger(level='debug', createlogfile=True, logpath="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs")
+# logger.static_debug("debug message", desc="Loggerino")
+# logger1.rename_logfile("new_log_file_name2.log", char_restiction=False)
+
+# test input logfile
+# logger2 = logger.Logger(level='DEBUG', logfile="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs\\TestFile.txt")

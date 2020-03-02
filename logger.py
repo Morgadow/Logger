@@ -11,17 +11,13 @@ import datetime
 # Date: 21.05.2019          #
 #############################
 
-# todo integrate only to file everywhere
 # todo test dauer static_debug vs debug
 
 # todo add custom log level
 # todo remove custom log level
-# todo type testing not ok, better raise errors: https://stackoverflow.com/questions/19684434/best-way-to-check-function-arguments-in-python
 # todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen, delim als input
 # todo test for other class using borg pattern --> raise runtimeError --> keine lösung gefunden wie das gehen soll
-# todo logfilenamen as input
-# todo logfile with full path accepted as input, sets path and filename
-# todo alle nachrichten in init in logfilebuffer schreiben, nichts davor ausgeben, loglevel als letztes EINSTELLEN, danach drucken
+
 
 # version
 __major__ = 4       # for major interface/format changes
@@ -146,13 +142,15 @@ class Logger(Borg):
     OFF         : 100
     """
 
-    def __init__(self, level=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logpath=None, addtimestamp=False, suppressloggernotes=False):
+    def __init__(self, level=DEFAULT_LOG_LEVEL, projectname=None, createlogfile=False, logfile=None, logpath=None, addtimestamp=False, suppressloggernotes=False):
         """ Only creates instance with new settings if no instance was created in session, settings are stored in Borg superclass """
 
         Borg.__init__(self)  # initiate monostate pattern
         if self.__dict__:  # to avoid changing settings with every new instance through default values after one instance is created init will be skipped
             self._logger_note('DEBUG', "New instance created, but a borg version already exists. Inputs will be ignored!")
         else:
+
+            self.__init_state = True  # until init is finished all notes are written into logfilebuffer and wont be printed directly
 
             # default possible log levels
             self.ALL = LogLevel('ALL', MIN_LOG_LEVEL_VALUE)
@@ -173,13 +171,24 @@ class Logger(Borg):
             # create logfile
             self.create_log_file = createlogfile
             self._log_file_created = False
-            if self.create_log_file:
+            if logfile is None:  # input logfile overrides some other inputs
+                self.__log_file_name = None
                 self.log_path = logpath
                 if self.log_path is not None:
                     self.log_path = os.path.normpath(os.path.abspath(logpath))
-                self.__log_file_name = None
-                self._log_file = None
-                self._log_file_created = self.__init_log_file()
+            else:
+                if os.path.exists(logfile) and os.path.isfile(logfile):  # wont override existing logfile and will not append to existing file
+                    raise RuntimeError("Logfile already exists, can not create one!")
+                self.log_path = os.path.abspath(os.path.dirname(os.path.abspath(logfile)))
+                if logpath is not None and logpath != os.path.dirname(os.path.abspath(logfile)):
+                    self._logger_note('WARNING', "Input logfile overrides input logpath! Using '{}' for logpath".format(self.log_path))
+                if not createlogfile:
+                    self._logger_note('WARNING', "Input logfile creates logfile despite input createlogfile set to false!")
+                    self.create_log_file = True
+                self.__log_file_name = os.path.splitext(os.path.normpath(logfile).split('\\')[-1])[0] + '.log'
+
+            if self.create_log_file:
+                self._log_file_created, self._log_file = self.__init_log_file()
 
             # eval log level
             self.level = vars(self)[DEFAULT_LOG_LEVEL]  # set initial log level
@@ -195,6 +204,7 @@ class Logger(Borg):
                 self._logger_note('WARNING', "Designed for Python 3.7, might cause problems!")
 
             # print buffer
+            self.__init_state = False
             if len(self.__log_file_buffer):
                 for message in self.__log_file_buffer:
                     self._logger_note(message[0], message[1])
@@ -210,8 +220,9 @@ class Logger(Borg):
         """
         try:
             if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
-                self._logger_note('ERROR', "Unknown log level: '{}'".format(log_level))
-                return False
+                raise ValueError("Unknown log level: '{}'".format(log_level))
+                # self._logger_note('ERROR', "Unknown log level: '{}'".format(log_level))
+                # return False
             self.level = vars(self)[log_level.upper()]
             self._logger_note('INFO', "Set Log level to '{}'".format(self.level.name))
             return True
@@ -228,17 +239,18 @@ class Logger(Borg):
         Initializes log file, as logpath default is skriptpath + 'logs', filename is generated based on project name, time and date
         :return: Boolean, True if file is generated successfully
         """
+        now = datetime.datetime.now()
         try:
             if self.log_path is None:  # then take default path:
                 self.log_path = os.path.normpath(os.path.join(os.getcwd(), 'logs'))
                 if not os.path.exists(self.log_path):
                     os.mkdir(self.log_path)  # create folder if not existing
                     if os.path.exists(self.log_path):
-                        self.__log_file_buffer.append(('DEBUG', "Created folder 'logs' at '{}'".format(os.getcwd())))
+                        self._logger_note('DEBUG', "Created folder 'logs' at '{}'".format(os.getcwd()))
                     else:
                         self.create_log_file = False
-                        self.__log_file_buffer.append(('ERROR', "Could not create folder 'logs' at '{}'. Will not create a log file!".format(os.getcwd())))
-                        return False
+                        self._logger_note('ERROR', "Could not create folder 'logs' at '{}'. Will not create a log file!".format(os.getcwd()))
+                        return False, None
 
             else:  # create all subfolders needed
                 delim = '\\'
@@ -247,30 +259,30 @@ class Logger(Borg):
                     if not os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
                         os.mkdir(os.path.normpath(delim.join(sub_folder_list[:folder + 1])))
                         if os.path.exists(os.path.normpath(delim.join(sub_folder_list[:folder + 1]))):
-                            self.__log_file_buffer.append(('DEBUG', "Created folder: '{}' at: '{}'".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder]))))
+                            self._logger_note('DEBUG', "Created folder: '{}' at: '{}'".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])))
                         else:
                             self.create_log_file = False
-                            self.__log_file_buffer.append(('ERROR', "Could not create folder '{}' at '{}'! Will not create log file!".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder]))))
-                            return False
+                            self._logger_note('ERROR', "Could not create folder '{}' at '{}'! Will not create log file!".format(sub_folder_list[folder], delim.join(sub_folder_list[:folder])))
+                            return False, None
 
             # evaluate __log_file_name
-            now = datetime.datetime.now()
-            if self.__project_name is not None:
-                self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '.log'
-            else:
-                self.__log_file_name = now.strftime("%d-%m-%Y") + '.log'
-            if self.__log_file_name in os.listdir(self.log_path):  # if file with name already exists add '_X' and count X until not existing
-                counter = 1
-                while True:
-                    if self.__project_name is not None:
-                        self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
-                    else:
-                        self.__log_file_name = now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
-                    if self.__log_file_name in os.listdir(self.log_path):
-                        counter += 1
-                    else:
-                        break
-            self.__log_file_buffer.append(('DEBUG', "Final log file name: {}".format(self.__log_file_name)))
+            if self.__log_file_name is None:
+                if self.__project_name is not None:
+                    self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '.log'
+                else:
+                    self.__log_file_name = now.strftime("%d-%m-%Y") + '.log'
+                if self.__log_file_name in os.listdir(self.log_path):  # if file with name already exists add '_X' and count X until not existing
+                    counter = 1
+                    while True:
+                        if self.__project_name is not None:
+                            self.__log_file_name = self.__project_name + '_' + now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
+                        else:
+                            self.__log_file_name = now.strftime("%d-%m-%Y") + '_' + str(counter) + '.log'
+                        if self.__log_file_name in os.listdir(self.log_path):
+                            counter += 1
+                        else:
+                            break
+            self._logger_note('DEBUG', "Final log file name: {}".format(self.__log_file_name))
 
             # init logfile
             with open(os.path.join(self.log_path, self.__log_file_name), 'w+') as log_file:
@@ -281,18 +293,18 @@ class Logger(Borg):
 
             if not os.path.isfile(os.path.join(self.log_path, self.__log_file_name)):  # could not create file
                 self.create_log_file = False
-                self.__log_file_buffer.append(('ERROR', "Could not create log file! Logger will not create any log file!"))
-                return False
+                self._logger_note('ERROR', "Could not create log file! Logger will not create any log file!")
+                return False, None
             else:
-                self.__log_file_buffer.append(('INFO', "Created log file '{}' at '{}'".format(self.__log_file_name, self.log_path)))
+                self._logger_note('INFO', "Created log file '{}' at '{}'".format(self.__log_file_name, self.log_path))
                 self._log_file = os.path.join(self.log_path, self.__log_file_name)
 
-            return True
+            return True, self._log_file
 
         except Exception as e:
             self.create_log_file = False
             self.__handle_excep(e)
-            return False
+            return False, None
 
     def rename_logfile(self, new_name, logfile_ext='.log', char_restiction=True):
         """
@@ -306,7 +318,7 @@ class Logger(Borg):
             raise ValueError("New logfilename must be a string with a maximum length of {}".format(MAX_LENGTH_LOGFILE_NAME))
         forbidden_chars = set("\\:'´`\"$§&/=")
         if char_restiction and any((c in forbidden_chars) for c in new_name):
-            raise ValueError("Forbidden character in new name, won't proceed!")
+            raise ValueError("Forbidden character in log file name: '{}'".format(new_name))
 
         try:
             if len(new_name.split('.')) > 1 and (new_name.split('.')[-1] == 'log' or new_name.split('.')[-1] == 'txt'):
@@ -314,7 +326,7 @@ class Logger(Borg):
                 self._logger_note('DEBUG', "Deleted extension for new logfile name, file format {} ist used for log files".format(logfile_ext))
             new_name = new_name + logfile_ext
             if os.path.exists(os.path.join(self.log_path, new_name)):
-                self._logger_note('ERROR', "A file file with name {} already exists in directory! Can't rename logfile!".format(new_name))
+                self._logger_note('ERROR', "A file file with name '{}' already exists in directory! Can't rename logfile!".format(new_name))
                 return
 
             os.rename(self._log_file, os.path.join(self.log_path, new_name))
@@ -470,10 +482,14 @@ class Logger(Borg):
 
         # todo handler if message not utf-8 encoded
 
+        if self.__init_state:  # while in init state add to log file buffer
+            self.__log_file_buffer.append((log_level, message, desc))
+            return
+
         if not isinstance(log_level, str) or log_level.upper() not in vars(self) or not isinstance(vars(self)[log_level.upper()], LogLevel):  # nicer approach than invoking __dict__
             # self._logger_note('ERROR', "Unknown log level: {}".format(log_level))
             # return
-            raise ValueError("Unknown log level: {}".format(log_level))
+            raise ValueError("Unknown log level: '{}'".format(log_level))
 
         if vars(self)[log_level.upper()].value < self.level.value:  # if loglevel not high enough
             return
