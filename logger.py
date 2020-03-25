@@ -12,6 +12,7 @@ import datetime
 #############################
 
 # todo test dauer static_debug vs debug
+# todo bei splits schauen ob auch richtig gesplittet und dann wieder zzsammengebaut
 
 # todo add custom log level
 # todo remove custom log level
@@ -21,7 +22,7 @@ import datetime
 
 # version
 __major__ = 4       # for major interface/format changes
-__minor__ = 1       # for minor interface/format changes
+__minor__ = 2       # for minor interface/format changes
 __release__ = 1     # for tweaks, bug-fixes, or development
 __version__ = '%d.%d.%d' % (__major__, __minor__, __release__)
 __version_info__ = tuple([int(num) for num in __version__.split('.')])
@@ -146,10 +147,7 @@ class Logger(Borg):
         """ Only creates instance with new settings if no instance was created in session, settings are stored in Borg superclass """
 
         Borg.__init__(self)  # initiate monostate pattern
-        if self.__dict__:  # to avoid changing settings with every new instance through default values after one instance is created init will be skipped
-            self._logger_note('DEBUG', "New instance created, but a borg version already exists. Inputs will be ignored!")
-        else:
-
+        if not self.__dict__:  # to avoid changing settings with every new instance through default values after one instance is created init will be skipped
             self.__init_state = True  # until init is finished all notes are written into logfilebuffer and wont be printed directly
 
             # default possible log levels
@@ -163,9 +161,9 @@ class Logger(Borg):
 
             self.start_time = time.time()
 
-            self.suppress_logger_notes = suppressloggernotes
+            self.suppress_logger_notes = suppressloggernotes  # todo nach formatter verschieben und dann als privae machen
             self.__log_file_buffer = []
-            self.time_stamp = addtimestamp
+            self.time_stamp = addtimestamp  # todo nach formatter verschieben und dann als privae machen
             self.__project_name = projectname  # shown in top line of logfile and name of logfile
 
             # create logfile
@@ -320,22 +318,31 @@ class Logger(Borg):
         if char_restiction and any((c in forbidden_chars) for c in new_name):
             raise ValueError("Forbidden character in log file name: '{}'".format(new_name))
 
+        # check given file extension
         try:
             if len(new_name.split('.')) > 1 and (new_name.split('.')[-1] == 'log' or new_name.split('.')[-1] == 'txt'):
                 new_name = new_name.split('.')[0]
-                self._logger_note('DEBUG', "Deleted extension for new logfile name, file format {} ist used for log files".format(logfile_ext))
             new_name = new_name + logfile_ext
-            if os.path.exists(os.path.join(self.log_path, new_name)):
-                self._logger_note('ERROR', "A file file with name '{}' already exists in directory! Can't rename logfile!".format(new_name))
-                return
+            # if os.path.exists(os.path.join(self.log_path, new_name)):
+            #     self._logger_note('ERROR', "A file file with name '{}' already exists in directory! Can't rename logfile!".format(new_name))
+            #     return
+
+            # if file with this name already exists, count '_X'
+            if os.path.isfile(os.path.join(self.log_path, new_name)):
+                counter = 1
+                new_name = '.'.join(new_name.split('.')[:len(new_name.split('.')) - 1]) + '_' + str(counter) + logfile_ext
+                while os.path.isfile(os.path.join(self.log_path, new_name)):
+                    basename = '.'.join(new_name.split('.')[:len(new_name.split('.'))-1])
+                    new_name = '_'.join(basename.split('_')[:len(basename.split('_'))-1]) + '_' + str(counter) + logfile_ext
+                    counter += 1
 
             os.rename(self._log_file, os.path.join(self.log_path, new_name))
             if not os.path.isfile(os.path.join(self.log_path, new_name)):
                 self._logger_note('ERROR', "Could not rename log file from '{}' to '{}'".format(self.__log_file_name, new_name))
             else:
-                self._logger_note('INFO', "Successfully Renamed logfile from '{}' to '{}'".format(self.__log_file_name, new_name))
                 self.__log_file_name = new_name
                 self._log_file = os.path.join(self.log_path, new_name)
+                self._logger_note('INFO', "Successfully renamed logfile from '{}' to '{}'".format(self.__log_file_name, new_name))
         except Exception as e:
             self.__handle_excep(e)
 
