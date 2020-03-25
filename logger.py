@@ -321,7 +321,7 @@ class Logger(Borg):
         # check given file extension
         try:
             if len(new_name.split('.')) > 1 and (new_name.split('.')[-1] == 'log' or new_name.split('.')[-1] == 'txt'):
-                new_name = new_name.split('.')[0]
+                new_name = '.'.join(new_name.split('.')[:len(new_name.split('.'))-1])
             new_name = new_name + logfile_ext
             # if os.path.exists(os.path.join(self.log_path, new_name)):
             #     self._logger_note('ERROR', "A file file with name '{}' already exists in directory! Can't rename logfile!".format(new_name))
