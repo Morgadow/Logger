@@ -18,7 +18,7 @@ import datetime
 # todo remove custom log level
 # todo formatter especially how time is printed, which delim und in welcher reihenfolge die teile kommen, delim als input
 # todo test for other class using borg pattern --> raise runtimeError --> keine lösung gefunden wie das gehen soll
-
+# todo handler log file removed while progress
 
 # version
 __major__ = 4       # for major interface/format changes
