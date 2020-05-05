@@ -520,8 +520,9 @@ class Logger(Borg):
                 with open(self.log_file, 'a') as log_file:
                     log_file.write(log_message + '\n')
             except FileNotFoundError:
-                self._logger_note(WARNING, "logfile '{}' not found, creating a new file!".format(self.log_file.split('\\')[-1]))
+                create_path(self.log_path)
                 self._eval_file_header(file=self.log_file)
+                self._logger_note(WARNING, "logfile was deleted, created new one!")
             except Exception as e:
                 self.__handle_excep(e)
 
