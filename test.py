@@ -2,6 +2,7 @@
 
 import logger
 import os
+import time
 
 
 # # logger = Logger(loglvl='DEBUG', addtimestamp=True, suppressloggernotes=False, createlogfile=True, logpath=os.path.normpath("C:\Users\QXY5145\Desktop\Python_INI_Skript_V2"))
@@ -54,10 +55,14 @@ import os
 # print(logger1._format)
 
 # test method rename logfile
-logger1 = logger.Logger(level='debug', createlogfile=True)
-logger1 = logger.Logger(level='debug', createlogfile=True, logpath="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs")
-logger.static_debug("debug message", desc="Loggerino")
-logger1.rename_logfile("new_log_file_name2.log", char_restiction=False)
+# logger1 = logger.Logger(level=logger.DEBUG, createlogfile=True)
+# logger1 = logger.Logger(level='debug', createlogfile=True, logpath="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs")
+# logger.static_debug("debug message", desc="Loggerino")
+# logger1.rename_logfile("new_log_file_name2.log", char_restiction=False)
 
 # test input logfile
 # logger2 = logger.Logger(level='DEBUG', logfile="C:\\Users\\Simon\\Desktop\\Projekte\\Python\\Logger\\logs\\TestFile.txt")
+
+os.system("cls")
+
+logger1 = logger.Logger(logger.DEBUG, logfile=os.path.join(os.getcwd(), 'logs', 'neuelogfile.log'))
