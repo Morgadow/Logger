@@ -28,6 +28,7 @@ import datetime
 
 """
 NOTE: Written in Python 3.7.1
+https://github.com/Morgadow/Logger
 """
 
 # version
